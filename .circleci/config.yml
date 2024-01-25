@@ -15,7 +15,7 @@ jobs:
           at: ~/
       - run:
           name: "Run validation"
-          command: circleci validate
+          command: circleci orb validate orb.yml
       - persist_to_workspace:
           root: ~/workspace
           paths:
