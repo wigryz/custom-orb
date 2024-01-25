@@ -6,6 +6,9 @@ display:
   source_url: https://github.com/wigryz/custom-orb
 
 # probably good idea would be to split those commands into small ones, to have possibility to override those commands
+# todo check changing working directory in commands
+# todo check omiting some points or completely overriding some steps
+# todo check creating some jobs that can be used in some projects that match template in 100%
 commands:
   build-with-gradle:
     description: |
@@ -33,6 +36,26 @@ commands:
           root: ~/workspace
           paths:
             - deployment
+  deploy-on-server:
+    description: |
+      This command deploys created war file and Dockerfile on server via scp.
+      It also creates copy of those files in tests, compiles application and copies war into deployment folder.~/backups folder.
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.SSH_FINGERPRINT >>
+      - run:
+          name: Sending files to application server
+          command: |
+            scp deployment/ROOT.war << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:current/ROOT.war
+    parameters:
+      SSH_USER:
+        type: string
+      SSH_HOST:
+        type: string
+      SSH_FINGERPRINT:
+        type: string
+
 executors:
   default:
     description: |
