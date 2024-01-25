@@ -1,55 +1,60 @@
 version: 2.1
 description: |
-  custom description custom description custom description custom description custom description
+  This orb was created to take out common logic for building, testing and deploying java applications build with gradle.
 display:
   home_url: https://github.com/wigryz/custom-orb
   source_url: https://github.com/wigryz/custom-orb
+
+# probably good idea would be to split those commands into small ones, to have possibility to override those commands
 commands:
-  greet:
+  build-with-gradle:
     description: |
-      This command echos "Hello World" using file inclusion.
-    parameters:
-      to:
-        default: World
-        description: Hello to whom?
-        type: string
+      This command runs tests, compiles application and copies war into deployment folder.
+      Deployment folder is stored as artifacts. It is also persisted in workspace.
     steps:
       - run:
-          command: |
-            #!/bin/bash
-            # This example uses envsubst to support variable substitution in the string parameter type.
-            # https://circleci.com/docs/orbs-best-practices/#accepting-parameters-as-strings-or-environment-variables
-            TO=$(circleci env subst "${PARAM_TO}")
-            # If for any reason the TO variable is not set, default to "World"
-            echo "Hello ${TO:-World}!"
-          environment:
-            PARAM_TO: <<parameters.to>>
-          name: Hello Greeting
+          name: "Run tests"
+          command: gradle test
+      - run:
+          name: "Compile application"
+          command: gradle assemble
+      - run:
+          name: "gradle war"
+          command: gradle war
+      - run:
+          name: "Copy war file into ./deployment directory"
+          command: gradle copyWarFileToDeployment
+      - store_artifacts:
+          path: ~/workspace/deployment/
+      - run:
+          name: "List all files in directory ./workspace/deployment"
+          command: ls -lA ~/workspace/deployment
+      - persist_to_workspace:
+          root: ~/workspace
+          paths:
+            - deployment
 executors:
   default:
     description: |
-      This is a sample executor using Docker and Node. If you want to provide a custom environment in your orb, insert your image here. If you do not require an executor, you can simply delete this directory.
+      If you want to provide a custom environment in your orb, insert your image here. If you do not require an executor, you can simply delete this directory.
     docker:
-      - image: cimg/node:<<parameters.tag>>
+      - image: gradle:<<parameters.tag>>
     parameters:
       tag:
-        default: lts
+        default: 8.5-jdk21
         description: |
-          Pick a specific cimg/node image variant: https://hub.docker.com/r/cimg/node/tags
+          Pick a specific gradle image variant: https://hub.docker.com/_/gradle/tags
+          Keep in mind that this image should have ssh and scp installed.
         type: string
+
 jobs:
-  hello:
+  custom-java-build-with-gradle:
     description: |
       Sample description
     executor: default
-    parameters:
-      to:
-        default: World
-        description: Hello to whom?
-        type: string
     steps:
-      - greet:
-          to: << parameters.to >>
+      - build-with-gradle
+
 examples:
   example:
     description: |
