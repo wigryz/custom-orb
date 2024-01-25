@@ -36,6 +36,10 @@ workflows:
   validate-and-publish:
     jobs:
       - validate
-      - publish:
+      - hold-deployment:
+          type: approval
           requires:
             - validate
+      - publish:
+          requires:
+            - hold-deployment
