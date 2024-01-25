@@ -30,6 +30,10 @@ jobs:
           command: |
             version=1.0.1
             circleci orb publish orb.yml << parameters.ORB_NAME >>@$version
+    parameters:
+      ORB_NAME:
+        type: string
+        default: custom-namespace/custom-orb
 
 workflows:
   version: 2
