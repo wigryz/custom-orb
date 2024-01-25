@@ -47,7 +47,7 @@ commands:
       - run:
           name: Sending files to application server
           command: |
-            scp deployment/ROOT.war << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:current/ROOT.war
+            scp -o StrictHostKeyChecking=no deployment/ROOT.war << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:current/ROOT.war
     parameters:
       SSH_USER:
         type: string
