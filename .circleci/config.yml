@@ -45,7 +45,7 @@ jobs:
       - run:
           name: "Publish new version"
           command: |
-            version=1.0.6
+            version=1.0.7
             circleci orb publish orb.yml << parameters.ORB_NAME >>@$version
     parameters:
       ORB_NAME:
