@@ -32,7 +32,6 @@ commands:
     parameters:
       override-content:
         type: string
-        default: "null"
     steps:
       - unless:
           condition: << parameters.override-content >>
@@ -44,7 +43,7 @@ commands:
           condition: << parameters.override-content >>
           steps:
             - run:
-                name: "Overridden run tests"
+                name: "Overridden run-tests step"
                 command: <<parameters.override-content>>
 
   compile:
@@ -52,88 +51,115 @@ commands:
     parameters:
       override-content:
         type: string
-        default: "null"
     steps:
-      - run:
-          name: "Compile application"
-          command: |
-            if [ "<<parameters.override-content>>" == "null" ]; then
-              gradle assemble
-            else
-              <<parameters.override-content>>
-            fi
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Compile application"
+                command: gradle assemble
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden compile step"
+                command: <<parameters.override-content>>
+
   create-executable:
     description: Create java executable file. By default it is done by gradle war.
     parameters:
       override-content:
         type: string
-        default: "null"
     steps:
-      - run:
-          name: "Create java executable file (gradle war)"
-          command: |
-            if [ "<<parameters.override-content>>" == "null" ]; then
-              gradle war
-            else
-              <<parameters.override-content>>
-            fi
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Create java executable file (gradle war)"
+                command: gradle war
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden create-executable step"
+                command: <<parameters.override-content>>
+                
   copy-executable-to-deployment:
-    description: Copy war file into ./deployment directory
+    description: Copy executable file into ./deployment directory
     parameters:
       override-content:
         type: string
-        default: "null"
     steps:
-      - run:
-          name: "Create java executable file (gradle war)"
-          command: |
-            if [ "<<parameters.override-content>>" == "null" ]; then
-              gradle copyWarFileToDeployment
-            else
-              <<parameters.override-content>>
-            fi
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Copy executable to ./deployment directory"
+                command: gradle copyWarFileToDeployment
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden copy-executable-to-deployment step"
+                command: <<parameters.override-content>>
+
   store-artifacts:
     description: Store files at ~/workspace/deployment/ as artifacts
     parameters:
       override-content:
         type: string
-        default: "null"
     steps:
-      - run:
-          name: "Store files at ~/workspace/deployment/ as artifacts"
-          command: |
-            if [ "<<parameters.override-content>>" == "null" ]; then
-              gradle copyWarFileToDeployment
-            else
-              <<parameters.override-content>>
-            fi
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - store_artifacts:
+                path: ~/workspace/deployment/
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden store-artifacts step"
+                command: <<parameters.override-content>>
 
-  build-with-gradle:
-    description: |
-      This command runs tests, compiles application and copies war into deployment folder.
-      Deployment folder is stored as artifacts. It is also persisted in workspace.
+  list-files-in-deployment:
+    description: List files in directory ~/workspace/deployment/
+    parameters:
+      override-content:
+        type: string
     steps:
-      - run:
-          name: "Run tests"
-          command: gradle test
-      - run:
-          name: "Compile application"
-          command: gradle assemble
-      - run:
-          name: "gradle war"
-          command: gradle war
-      - run:
-          name: "Copy war file into ./deployment directory"
-          command: gradle copyWarFileToDeployment
-      - store_artifacts:
-          path: ~/workspace/deployment/
-      - run:
-          name: "List all files in directory ./workspace/deployment"
-          command: ls -lA ~/workspace/deployment
-      - persist_to_workspace:
-          root: ~/workspace
-          paths:
-            - deployment
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "List all files in directory ~/workspace/deployment"
+                command: ls -lA ~/workspace/deployment
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden list-files-in-deployment step"
+                command: <<parameters.override-content>>
+
+  persist-to-workspace:
+    description: Persist to workspace
+    parameters:
+      override-content:
+        type: string
+    steps:
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - persist_to_workspace:
+                root: ~/workspace
+                paths:
+                  - deployment
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden persist-to-workspace step"
+                command: <<parameters.override-content>>
+
   deploy-on-server:
     description: |
       This command deploys created war file and Dockerfile on server via scp.
@@ -155,23 +181,42 @@ commands:
         type: string
 
 jobs:
-  custom-java-build-with-gradle:
+  build-java-app-using-gradle:
     working_directory: ~/workspace
     description: |
-      Sample description
+      Job starting tests, assembling application and storing deployment folder of application as artifacts.
     executor: default
     parameters:
       run-tests-override-content:
         type: string
-        default: "null"
+      compile-override-content:
+        type: string
+      create-executable-override-content:
+        type: string
+      copy-executable-to-deployment-override-content:
+        type: string
+      store-artifacts-override-content:
+        type: string
+      list-files-in-deployment-override-content:
+        type: string
+      persist-to-workspace-override-content:
+        type: string
     steps:
       - checkout-code
       - run-tests:
           override-content: << parameters.run-tests-override-content >>
-      - compile
-      - create-executable
-      - copy-executable-to-deployment
-      - store-artifacts
+      - compile:
+          override-content: << parameters.compile-override-content >>
+      - create-executable:
+          override-content: << parameters.create-executable-override-content >>
+      - copy-executable-to-deployment:
+          override-content: << parameters.copy-executable-to-deployment-override-content >>
+      - store-artifacts:
+          override-content: << parameters.store-artifacts-override-content >>
+      - list-files-in-deployment:
+          override-content: << parameters.list-files-in-deployment-override-content >>
+      - persist-to-workspace:
+          override-content: << parameters.persist-to-workspace-override-content >>
 
 examples:
   example:
