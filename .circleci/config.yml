@@ -13,7 +13,7 @@ jobs:
           path: ~/workspace
       - attach_workspace:
           at: ~/
-      - cli/install
+      - circleci-cli/install
       - run:
           name: "Run validation"
           command: circleci orb validate orb.yml
