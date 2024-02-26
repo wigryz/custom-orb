@@ -26,6 +26,8 @@ jobs:
     docker:
       - image: circleci/circleci-cli:latest
     steps:
+      - attach_workspace:
+          at: ~/
       - run:
           name: "Setup circleci"
           command: |
