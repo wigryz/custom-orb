@@ -19,8 +19,6 @@ executors:
           Keep in mind that this image should have ssh and scp installed.
         type: string
 
-
-# Why default value of override-content is null? Because "" would lead to invalid if statement.
 commands:
   checkout-code:
     description: |
@@ -28,6 +26,7 @@ commands:
     steps:
       - checkout:
           path: ~/workspace
+
   run-tests:
     description: Run tests
     parameters:
@@ -35,14 +34,19 @@ commands:
         type: string
         default: "null"
     steps:
-      - run:
-          name: "Run tests"
-          command: |
-            if [ "<<parameters.override-content>>" == "null" ]; then
-              gradle test
-            else
-              <<parameters.override-content>>
-            fi
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Run tests"
+                command: gradle test
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden run tests"
+                command: <<parameters.override-content>>
+
   compile:
     description: Compile application
     parameters:
