@@ -31,6 +31,10 @@ jobs:
           command: |
             circleci setup --no-prompt --token $CIRCLE_TOKEN
       - run:
+          name: "ls"
+          command: |
+            ls -al
+      - run:
           name: "Publish new version"
           command: |
             version=1.0.1
