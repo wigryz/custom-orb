@@ -36,10 +36,11 @@ commands:
       - run:
           name: "Run tests"
           command: |
-            if [ -z <<parameters.override-content>> ]; then
+            if [ -z "<<parameters.override-content>>" ]; then
               gradle test
             else
               <<parameters.override-content>>
+            fi
 
   build-with-gradle:
     description: |
