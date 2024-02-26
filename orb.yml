@@ -43,6 +43,66 @@ commands:
             else
               <<parameters.override-content>>
             fi
+  compile:
+    description: Compile application
+    parameters:
+      override-content:
+        type: string
+        default: "null"
+    steps:
+      - run:
+          name: "Compile application"
+          command: |
+            if [ "<<parameters.override-content>>" == "null" ]; then
+              gradle assemble
+            else
+              <<parameters.override-content>>
+            fi
+  create-executable:
+    description: Create java executable file. By default it is done by gradle war.
+    parameters:
+      override-content:
+        type: string
+        default: "null"
+    steps:
+      - run:
+          name: "Create java executable file (gradle war)"
+          command: |
+            if [ "<<parameters.override-content>>" == "null" ]; then
+              gradle war
+            else
+              <<parameters.override-content>>
+            fi
+  copy-executable-to-deployment:
+    description: Copy war file into ./deployment directory
+    parameters:
+      override-content:
+        type: string
+        default: "null"
+    steps:
+      - run:
+          name: "Create java executable file (gradle war)"
+          command: |
+            if [ "<<parameters.override-content>>" == "null" ]; then
+              gradle copyWarFileToDeployment
+            else
+              <<parameters.override-content>>
+            fi
+  store-artifacts:
+    description: Store files at ~/workspace/deployment/ as artifacts
+    parameters:
+      override-content:
+        type: string
+        default: "null"
+    steps:
+      - run:
+          name: "Store files at ~/workspace/deployment/ as artifacts"
+          command: |
+            if [ "<<parameters.override-content>>" == "null" ]; then
+              gradle copyWarFileToDeployment
+            else
+              <<parameters.override-content>>
+            fi
 
   build-with-gradle:
     description: |
@@ -104,6 +164,10 @@ jobs:
       - checkout-code
       - run-tests:
           override-content: << parameters.run-tests-override-content >>
+      - compile
+      - create-executable
+      - copy-executable-to-deployment
+      - store-artifacts
 
 examples:
   example:
