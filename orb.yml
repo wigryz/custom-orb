@@ -5,11 +5,6 @@ display:
   home_url: https://github.com/wigryz/custom-orb
   source_url: https://github.com/wigryz/custom-orb
 
-# probably good idea would be to split those commands into small ones, to have possibility to override those commands
-# todo check changing working directory in commands
-# todo check omiting some points or completely overriding some steps
-# todo check creating some jobs that can be used in some projects that match template in 100%
-  #todo current folder should be created before
 commands:
   build-with-gradle:
     description: |
