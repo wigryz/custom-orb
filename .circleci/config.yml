@@ -34,19 +34,10 @@ jobs:
       - attach_workspace:
           at: ~/workspace
       - run:
-          name: "Setup circleci"
-          command: |
-            circleci setup --no-prompt --token $CIRCLECI_API_TOKEN
-      - run:
-          name: "ls"
-          command: |
-            pwd
-            ls -al
-      - run:
           name: "Publish new version"
           command: |
-            version=1.0.9
-            circleci orb publish orb.yml << parameters.ORB_NAME >>@$version
+            version=1.0.10
+            circleci orb publish increment orb.yml << parameters.ORB_NAME >> patch  --token $CIRCLECI_API_TOKEN
     parameters:
       ORB_NAME:
         type: string
