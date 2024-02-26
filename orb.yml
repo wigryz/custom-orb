@@ -26,6 +26,21 @@ commands:
     steps:
       - checkout:
           path: ~/workspace
+  run-tests:
+    description: Run tests
+    parameters:
+      override-content:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: "Run tests"
+          command: |
+            if [ -z <<parameters.override-content>> ]; then
+              gradle test
+            else
+              <<parameters.override-content>>
+
   build-with-gradle:
     description: |
       This command runs tests, compiles application and copies war into deployment folder.
@@ -78,9 +93,14 @@ jobs:
     description: |
       Sample description
     executor: default
+    parameters:
+      run-tests-override-content:
+        type: string
+        default: ""
     steps:
       - checkout-code
-      - build-with-gradle
+      - run-tests:
+          override-content: << parameters.run-tests-override-content >>
 
 examples:
   example:
