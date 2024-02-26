@@ -20,11 +20,12 @@ jobs:
       - run:
           name: "ls"
           command: |
+            pwd
             ls -al
       - persist_to_workspace:
           root: ~/workspace
           paths:
-            - .
+            - orb.yml
   publish:
     working_directory: ~/workspace
     docker:
@@ -39,6 +40,7 @@ jobs:
       - run:
           name: "ls"
           command: |
+            pwd
             ls -al
       - run:
           name: "Publish new version"
