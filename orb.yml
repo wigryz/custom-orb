@@ -38,7 +38,7 @@ commands:
       - run:
           name: "Run tests"
           command: |
-            if [ "<<parameters.override-content>>" != "null" ]; then
+            if [ "<<parameters.override-content>>" == "null" ]; then
               gradle test
             else
               <<parameters.override-content>>
