@@ -167,10 +167,19 @@ commands:
                 name: "Overridden persist-to-workspace step"
                 command: <<parameters.override-content>>
 
-  deploy-on-server:
+  send-files-to-server:
     description: |
-      This command deploys created war file and Dockerfile on server via scp.
-      It also creates copy of those files in tests, compiles application and copies war into deployment folder.~/backups folder.
+      This command sends created war file and Dockerfile to server via scp.
+      It also creates copy of those files in ~/backups folder.
+    parameters:
+      SSH_USER:
+        type: string
+      SSH_HOST:
+        type: string
+      APP_PATH:
+        type: string
+      SSH_FINGERPRINT:
+        type: string
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -178,14 +187,52 @@ commands:
       - run:
           name: Sending files to application server
           command: |
-            scp -o StrictHostKeyChecking=no deployment/ROOT.war << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:current/ROOT.war
+            scp deployment/ROOT.war << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:<< parameters.APP_PATH >>/current/ROOT.war
+            scp deployment/Dockerfile << parameters.SSH_USER >>@<< parameters.SSH_HOST >>:<< parameters.APP_PATH >>/current/Dockerfile
+      - run:
+          name: Make copy of sent files in backups folder
+          command: |
+            ssh << parameters.SSH_USER >>@<< parameters.SSH_HOST >> "
+            cd << parameters.APP_PATH >>
+            mkdir -p backups
+            timestamp=\$(date +'%Y_%m_%d_%H_%M_%S')
+            cp current/ROOT.war backups/ROOT_\$timestamp.war
+            cp current/Dockerfile backups/Dockerfile_\$timestamp.war"
+
+  deploy-on-server:
+    description: |
+      This command deploys application using deploy.sh script.
     parameters:
+      override-content:
+        type: string
+        default: ""
       SSH_USER:
         type: string
       SSH_HOST:
         type: string
+      APP_PATH:
+        type: string
       SSH_FINGERPRINT:
         type: string
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - << parameters.SSH_FINGERPRINT >>
+      - unless:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: Deployment on application server
+                command: |
+                  ssh << parameters.SSH_USER >>@<< parameters.SSH_HOST >> "
+                  cd << parameters.APP_PATH >>
+                  sudo bash deploy.sh"
+      - when:
+          condition: << parameters.override-content >>
+          steps:
+            - run:
+                name: "Overridden list-files-in-deployment step"
+                command: <<parameters.override-content>>
 
 jobs:
   build-java-app-using-gradle:
