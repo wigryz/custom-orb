@@ -36,7 +36,7 @@ jobs:
       - run:
           name: "Setup circleci"
           command: |
-            circleci setup --no-prompt --token $CIRCLE_TOKEN
+            circleci setup --no-prompt --token $CIRCLECI_API_TOKEN
       - run:
           name: "ls"
           command: |
@@ -45,7 +45,7 @@ jobs:
       - run:
           name: "Publish new version"
           command: |
-            version=1.0.2
+            version=1.0.3
             circleci orb publish orb.yml << parameters.ORB_NAME >>@$version
     parameters:
       ORB_NAME:
@@ -64,5 +64,3 @@ workflows:
       - publish:
           requires:
             - hold-deployment
-          context:
-            - orb-publishing
