@@ -11,6 +11,10 @@ commands:
       This command runs tests, compiles application and copies war into deployment folder.
       Deployment folder is stored as artifacts. It is also persisted in workspace.
     steps:
+      - checkout:
+          path: ~/workspace
+      - attach_workspace:
+          at: ~/
       - run:
           name: "Run tests"
           command: gradle test
