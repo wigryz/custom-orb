@@ -172,11 +172,11 @@ commands:
       This command sends created war file and Dockerfile to server via scp.
       It also creates copy of those files in ~/backups folder.
     parameters:
+      APP_PATH:
+        type: string
       SSH_USER:
         type: string
       SSH_HOST:
-        type: string
-      APP_PATH:
         type: string
       SSH_FINGERPRINT:
         type: string
@@ -206,11 +206,11 @@ commands:
       override-content:
         type: string
         default: ""
+      APP_PATH:
+        type: string
       SSH_USER:
         type: string
       SSH_HOST:
-        type: string
-      APP_PATH:
         type: string
       SSH_FINGERPRINT:
         type: string
@@ -278,6 +278,33 @@ jobs:
           override-content: << parameters.list-files-in-deployment-override-content >>
       - persist-to-workspace:
           override-content: << parameters.persist-to-workspace-override-content >>
+
+  deploy-java-application:
+    working_directory: ~/workspace
+    description: |
+      Job sending java executable files and Dockerfile to server, also creating backup of those files.
+      After sending executables it launches deploy.sh script that is meant to finish deployment on external server.
+    executor: default
+    parameters:
+      deploy-on-server-override-content:
+        type: string
+        default: ""
+      APP_PATH:
+        type: string
+      SSH_USER:
+        type: string
+      SSH_HOST:
+        type: string
+      SSH_FINGERPRINT:
+        type: string
+    steps:
+      - send-files-to-server:
+          SSH_USER: << parameters.SSH_USER >>
+          SSH_HOST: << parameters.SSH_HOST >>
+          APP_PATH: << parameters.APP_PATH >>
+          SSH_FINGERPRINT: << parameters.SSH_FINGERPRINT >>
+      - deploy-on-server:
+          override-content: << parameters.deploy-on-server-override-content >>
 
 examples:
   example:
