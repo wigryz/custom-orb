@@ -24,7 +24,7 @@ jobs:
   publish:
     working_directory: ~/workspace
     docker:
-      - image: gradle:8.5-jdk21
+      - image: circleci/circleci-cli:latest
     steps:
       - run:
           name: "Publish new version"
