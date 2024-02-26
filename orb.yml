@@ -6,11 +6,30 @@ display:
   source_url: https://github.com/wigryz/custom-orb
 
 commands:
+  checkout-code:
+    description: |
+      Checks out code from current branch.
+    steps:
+      - checkout:
+          path: ~/workspace
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: ls/pwd
+          command: |
+            ls -lA
+            pwd
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - workspace
   build-with-gradle:
     description: |
       This command runs tests, compiles application and copies war into deployment folder.
       Deployment folder is stored as artifacts. It is also persisted in workspace.
     steps:
+      - attach_workspace:
+          at: ~/
       - run:
           name: "Run tests"
           command: gradle test
@@ -68,10 +87,12 @@ executors:
 
 jobs:
   custom-java-build-with-gradle:
+    working_directory: ~/workspace
     description: |
       Sample description
     executor: default
     steps:
+      - checkout-code
       - build-with-gradle
 
 examples:
