@@ -32,7 +32,7 @@ jobs:
       - image: circleci/circleci-cli:latest
     steps:
       - attach_workspace:
-          at: ~/
+          at: ~/workspace
       - run:
           name: "Setup circleci"
           command: |
@@ -63,7 +63,6 @@ workflows:
             - validate
       - publish:
           requires:
-            - validate
             - hold-deployment
           context:
             - orb-publishing
