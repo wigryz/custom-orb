@@ -99,7 +99,7 @@ jobs:
     parameters:
       run-tests-override-content:
         type: string
-        default: ""
+        default: "null"
     steps:
       - checkout-code
       - run-tests:
